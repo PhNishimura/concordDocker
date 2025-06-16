@@ -1,13 +1,17 @@
 version: '3.8'
 services:
   backend:
+    build: ./backend
     image: minha_stack_backend
     ports:
       - "3000:3000"
     networks:
       - app-network
+    depends_on:
+      - db
 
   frontend:
+    build: ./frontend
     image: minha_stack_frontend
     ports:
       - "8080:80"

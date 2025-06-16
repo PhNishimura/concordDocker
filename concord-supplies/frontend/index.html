@@ -2,9 +2,111 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
-  <title>Frontend Docker</title>
+  <title>Cadastro de Usuários</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: linear-gradient(to right, #667eea, #764ba2);
+      color: white;
+      padding: 40px;
+      max-width: 600px;
+      margin: auto;
+    }
+    h1 {
+      text-align: center;
+    }
+    form {
+      background: rgba(0,0,0,0.3);
+      padding: 20px;
+      border-radius: 8px;
+      margin-bottom: 30px;
+    }
+    input, button {
+      padding: 10px;
+      margin: 5px 0;
+      width: 100%;
+      border: none;
+      border-radius: 4px;
+    }
+    input {
+      font-size: 1em;
+    }
+    button {
+      background: #5a67d8;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    table {
+      width: 100%;
+      background: rgba(0,0,0,0.3);
+      border-collapse: collapse;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    th, td {
+      padding: 12px;
+      border-bottom: 1px solid #444;
+      text-align: left;
+    }
+    th {
+      background: #5a67d8;
+    }
+  </style>
 </head>
 <body>
-  <h1>Frontend rodando com Docker!</h1>
+  <h1>Cadastro de Usuários</h1>
+  <form id="userForm">
+    <input type="text" id="name" placeholder="Nome" required />
+    <input type="email" id="email" placeholder="Email" required />
+    <button type="submit">Cadastrar</button>
+  </form>
+
+  <table id="usersTable" style="display:none">
+    <thead>
+      <tr><th>ID</th><th>Nome</th><th>Email</th></tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <script>
+    const apiBase = 'http://localhost:3000/api/users';
+
+    async function fetchUsers() {
+      const res = await fetch(apiBase);
+      const users = await res.json();
+      const tbody = document.querySelector('#usersTable tbody');
+      tbody.innerHTML = '';
+      users.forEach(user => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td>${user.id}</td><td>${user.name}</td><td>${user.email}</td>`;
+        tbody.appendChild(tr);
+      });
+      document.getElementById('usersTable').style.display = users.length ? 'table' : 'none';
+    }
+
+    document.getElementById('userForm').addEventListener('submit', async e => {
+      e.preventDefault();
+      const name = document.getElementById('name').value.trim();
+      const email = document.getElementById('email').value.trim();
+      if (!name || !email) return alert('Preencha todos os campos.');
+
+      try {
+        const res = await fetch(apiBase, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, email })
+        });
+        if (!res.ok) throw new Error('Erro no cadastro');
+        document.getElementById('name').value = '';
+        document.getElementById('email').value = '';
+        fetchUsers();
+      } catch {
+        alert('Erro ao cadastrar usuário');
+      }
+    });
+
+    fetchUsers();
+  </script>
 </body>
 </html>
